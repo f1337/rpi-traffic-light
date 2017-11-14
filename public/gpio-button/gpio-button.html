@@ -1,0 +1,103 @@
+<template>
+    <style>
+        :host {
+          border-width: 2px;
+          display: inline-block;
+          text-align: center;
+        }
+    </style>
+    <slot></slot>
+</template>
+<script>
+  (function(window, document, undefined) {
+    var template = (
+      document._currentScript || document.currentScript
+    ).ownerDocument.querySelector('template').content;
+
+    class GPIOButton extends HTMLElement {
+
+      get pin() {
+        return this.getAttribute('pin');
+      }
+
+      constructor() {
+        super();
+        console.log("GPIOButton", this.innerText);
+
+        // if this.value is set, ping API to set initial value
+        var initialValue = this.getAttribute('value');
+        if (initialValue) {
+          this.setGPIOValue(initialValue);
+        // else query current state via API and set value
+        } else {
+          this.fetchGPIOValue();
+        }
+
+        this.addEventListener('click', e => {
+          this.toggleGPIOValue();
+        });
+      }
+
+      connectedCallback() {
+        var shadowRoot = this.attachShadow({
+          mode: 'open'
+        });
+
+        // Adds a template clone into shadow root.
+        var clone = document.importNode(template, true);
+        shadowRoot.appendChild(clone);
+      }
+
+      fetchGPIOValue() {
+        if (!this.pin) {
+          return;
+        }
+
+        var me = this;
+
+        fetch('/gpio/' + this.pin)
+          .then(function(response) {
+            return response.text();
+          }).then(function(body) {
+            var pin = JSON.parse(body);
+            me.setAttribute('value', pin.value)
+          }).catch(function(err) {
+            console.log('error', err);
+          });
+      }
+
+      setGPIOValue(value) {
+        if (!this.pin) {
+          return;
+        }
+
+        value = value.toString();
+        if (value != "0") {
+          value = "1"
+        }
+
+        var me = this;
+
+        fetch('/gpio/' + this.pin + '/' + value)
+          .then(function(response) {
+            return response.status;
+          }).then(function(status) {
+            if (status == 200) {
+              me.setAttribute('value', value);
+            }
+          }).catch(function(err) {
+            console.log('error', err);
+          });
+      }
+
+      toggleGPIOValue() {
+        if (!this.pin) {
+          return;
+        }
+
+        this.setGPIOValue(this.getAttribute('value') == "0" ? "1" : "0");
+      }
+    }
+    window.customElements.define('gpio-button', GPIOButton);
+  })(window, document);
+</script>

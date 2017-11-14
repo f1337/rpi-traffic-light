@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>PiLight</title>
+
+  <script src="pilight.js" charset="utf-8"></script>
+  <link rel="stylesheet" href="pilight.css">
+  <link rel="import" href="gpio-button/gpio-button.html">
+</head>
+
+<body>
+  <main>
+    <gpio-button pin="14" name="red">🚦 RED</gpio-button>
+
+    <gpio-button pin="15" name="yellow" value="0">○ YELLOW</gpio-button>
+
+    <gpio-button pin="18" name="green">● GREEN</gpio-button>
+
+  </main>
+</body>
+
+</html>
