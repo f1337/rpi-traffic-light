@@ -12,10 +12,15 @@
 
 `sudo ./pilight-http`
 
-# Get the value of pin #1
+# Get the value of pin #1 using cURL
 
-GET http://192.168.1.xxx:8000/gpio/1
+`curl -H 'Content-Type: application/json'  http://192.168.1.xxx:8000/gpio/1`
 
-# Set the value of pin #2 to 1 (high/on)
+# Set the value of pin #2 to 1 (high/on) using cURL
 
-GET http://192.168.1.xxx:8000/gpio/2/1
+`curl -H 'Content-Type: application/json' -X PUT -d '{"value": "1"}' http://192.168.1.xxx:8000/gpio/2`
+
+## TODO
+
+* docs: screenshots, hardware sketches, video?
+* split embd http server into separate repo?
