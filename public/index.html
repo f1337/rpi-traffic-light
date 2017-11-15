@@ -10,17 +10,19 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/1.0.17/webcomponents-loader.js"></script>
   <link rel="import" href="gpio-button/gpio-button.html">
+  <link rel="import" href="traffic-light/traffic-light.html">
   <link rel="stylesheet" href="pilight.css">
 </head>
 
 <body>
   <main>
-    <gpio-button pin="14" name="red">🚦 RED</gpio-button>
+    <traffic-light>
+      <gpio-button pin="14"></gpio-button>
 
-    <gpio-button pin="15" name="yellow" value="0">○ YELLOW</gpio-button>
+      <gpio-button pin="15" value="0"></gpio-button>
 
-    <gpio-button pin="18" name="green">● GREEN</gpio-button>
-
+      <gpio-button pin="18"></gpio-button>
+    </traffic-light>
   </main>
 </body>
 

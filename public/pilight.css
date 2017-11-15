@@ -1,22 +1,13 @@
 main
 {
-  background: black;
-  border-radius: 0.4em;
-  box-shadow: 0 0 0.6em rgba(0, 0, 2, 0.8);
-  margin: auto;
-  padding: 0.6em;
   width: 40vh;
+  margin: auto;
 }
 
 gpio-button
 {
-  border-color: white;
-  border-style: inset;
-  border-radius: 100%;
-  display: block;
   height: 26vh;
-  line-height: 26vh;
-  margin: 1em auto;
+  margin: 1em;
   width: 26vh;
 }
 
@@ -28,19 +19,4 @@ gpio-button[value="0"]
 gpio-button[value="1"]
 {
   opacity: 0.3
-}
-
-gpio-button[name="red"]
-{
-  background-color: red;
-}
-
-gpio-button[name="yellow"]
-{
-  background-color: yellow;
-}
-
-gpio-button[name="green"]
-{
-  background-color: green;
 }

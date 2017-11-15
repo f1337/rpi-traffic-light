@@ -22,7 +22,6 @@
 
       constructor() {
         super();
-        console.log("GPIOButton", this.innerText);
 
         // if this.value is set, ping API to set initial value
         var initialValue = this.getAttribute('value');
@@ -56,10 +55,9 @@
         var me = this;
 
         fetch('/gpio/' + this.pin)
+          .then(me._handleErrors)
           .then(function(response) {
-            return response.text();
-          }).then(function(body) {
-            var pin = JSON.parse(body);
+            var pin = JSON.parse(response.text());
             me.setAttribute('value', pin.value)
           }).catch(function(err) {
             console.log('error', err);
@@ -79,12 +77,9 @@
         var me = this;
 
         fetch('/gpio/' + this.pin + '/' + value)
+          .then(me._handleErrors)
           .then(function(response) {
-            return response.status;
-          }).then(function(status) {
-            if (status == 200) {
-              me.setAttribute('value', value);
-            }
+            me.setAttribute('value', value);
           }).catch(function(err) {
             console.log('error', err);
           });
@@ -96,6 +91,13 @@
         }
 
         this.setGPIOValue(this.getAttribute('value') == "0" ? "1" : "0");
+      }
+
+      _handleErrors(response) {
+        if (!response.ok) {
+          throw response.statusText;
+        }
+        return response;
       }
     }
     window.customElements.define('gpio-button', GPIOButton);
