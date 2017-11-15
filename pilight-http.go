@@ -11,8 +11,7 @@ func main () {
 
   // GPIO API
   r.HandleFunc("/gpio/{id}", gpio.Show).Methods("GET")
-  // r.HandleFunc("/gpio/{id}", gpio.Update).Methods("PUT")
-  r.HandleFunc("/gpio/{id}/{value}", gpio.Update).Methods("GET")
+  r.HandleFunc("/gpio/{id}", gpio.Update).Methods("PUT")
 
   // serve static files
   fs := http.FileServer(http.Dir("public"))

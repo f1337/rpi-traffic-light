@@ -45,16 +45,8 @@
 
     class TrafficLight extends HTMLElement {
 
-      constructor() {
-        super();
-      }
-
       connectedCallback() {
-        var shadowRoot = this.attachShadow({
-          mode: 'open'
-        });
-
-        // Adds a template clone into shadow root.
+        var shadowRoot = this.attachShadow({ mode: 'open' });
         var clone = document.importNode(template, true);
         shadowRoot.appendChild(clone);
       }

@@ -38,66 +38,51 @@
       }
 
       connectedCallback() {
-        var shadowRoot = this.attachShadow({
-          mode: 'open'
-        });
-
-        // Adds a template clone into shadow root.
+        var shadowRoot = this.attachShadow({ mode: 'open' });
         var clone = document.importNode(template, true);
         shadowRoot.appendChild(clone);
       }
 
       fetchGPIOValue() {
-        if (!this.pin) {
-          return;
-        }
-
-        var me = this;
+        if (! this.pin) return;
 
         fetch('/gpio/' + this.pin)
-          .then(me._handleErrors)
-          .then(function(response) {
-            var pin = JSON.parse(response.text());
-            me.setAttribute('value', pin.value)
-          }).catch(function(err) {
-            console.log('error', err);
-          });
+          .then(response => this._handleErrors(response))
+          .then(body => this._updateAttributes(body))
+          .catch(console.log);
       }
 
       setGPIOValue(value) {
-        if (!this.pin) {
-          return;
-        }
+        if (! this.pin) return;
 
         value = value.toString();
-        if (value != "0") {
-          value = "1"
-        }
+        if (value != "0") value = "1";
 
-        var me = this;
+        var payload = { value: value };
 
-        fetch('/gpio/' + this.pin + '/' + value)
-          .then(me._handleErrors)
-          .then(function(response) {
-            me.setAttribute('value', value);
-          }).catch(function(err) {
-            console.log('error', err);
-          });
+        fetch('/gpio/' + this.pin, {
+          method: 'PUT',
+          headers: new Headers({
+            'Content-Type': 'application/json'
+          }),
+          body: JSON.stringify(payload)
+        }).then(response => this._handleErrors(response))
+          .then(body => this._updateAttributes(body))
+          .catch(console.log);
       }
 
       toggleGPIOValue() {
-        if (!this.pin) {
-          return;
-        }
-
         this.setGPIOValue(this.getAttribute('value') == "0" ? "1" : "0");
       }
 
       _handleErrors(response) {
-        if (!response.ok) {
-          throw response.statusText;
-        }
-        return response;
+        if (! response.ok) throw response.statusText;
+        return response.text();
+      }
+
+      _updateAttributes(body) {
+        var pin = JSON.parse(body);
+        this.setAttribute('value', pin.value)
       }
     }
     window.customElements.define('gpio-button', GPIOButton);
