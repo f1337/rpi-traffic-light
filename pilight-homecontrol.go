@@ -1,66 +1,42 @@
 package main
 
 import (
-  "github.com/f1337/hc"
+  "github.com/brutella/hc"
   "github.com/brutella/hc/accessory"
+  rpi "accessory"
   "log"
   "os"
-  gpiox "adapters/embdx"
 )
 
-type DigitalOutput struct {
-  accessory *accessory.Lightbulb
-  pin string
-}
-
-func NewDigitalOutput (name string, pin string) *DigitalOutput {
-  info := accessory.Info {
-    Name:         name,
-    Manufacturer: "brighid ronan and dad",
-  }
-
-  acc := accessory.NewLightbulb(info)
-
-  light := &DigitalOutput{acc, pin}
-
-  acc.Lightbulb.On.OnValueRemoteUpdate(func(on bool) {
-    if on == true {
-      turnLightOn(light)
-    } else {
-      turnLightOff(light)
-    }
-  })
-
-  return light
-}
-
-func turnLightOn (light *DigitalOutput) {
-  log.Println("Turn " + light.accessory.Info.Name.GetValue() + " On")
-  if err := gpiox.WritePinValue(light.pin, 0); err != nil {
-    log.Fatal(err)
-  }
-}
-
-func turnLightOff (light *DigitalOutput) {
-  log.Println("Turn " + light.accessory.Info.Name.GetValue() + " Off")
-  if err := gpiox.WritePinValue(light.pin, 1); err != nil {
-    log.Fatal(err)
-  }
-}
-
 func main () {
-  red := NewDigitalOutput("Red", "14")
-  yellow := NewDigitalOutput("Yellow", "15")
-  green := NewDigitalOutput("Green", "18")
+  // TODO: hide the hc interface
+  // trafficLight := rpi.NewRaspberryPi(accessory.Info{
+  //   Name:         "TrafficLight",
+  //   Manufacturer: "brighid ronan and dad",
+  // }, red, yellow, green)
+  // if err := trafficLight.Start(hc.Config{Pin: "86753091", StoragePath: "krakatoa"}), err != nil {
+  //   log.Fatal(err)
+  // }
 
-  t, err := hc.NewIPTransport(hc.Config{Name: "TrafficLight", Pin: "32191123"}, red.accessory.Accessory, yellow.accessory.Accessory, green.accessory.Accessory)
+  // TODO: read rpiConfig, per-light config, ipConfig from local .yml or .json
+  // cf. https://github.com/timoschilling/dashbridge/blob/master/dashbridge.go
+  red := rpi.NewDigitalSwitch(accessory.Info{Name: "Red"}, "14", true).Accessory
+  yellow := rpi.NewDigitalSwitch(accessory.Info{Name: "Yellow"}, "15", true).Accessory
+  green := rpi.NewDigitalSwitch(accessory.Info{Name: "Green"}, "18", true).Accessory
+
+  trafficLight := rpi.NewRaspberryPi(accessory.Info{
+    Name:         "TrafficLight",
+    Manufacturer: "brighid ronan and dad",
+  }).Bridge
+
+  ipConfig := hc.Config{Pin: "86753091", StoragePath: "krakatoa"}
+  t, err := hc.NewIPTransport(ipConfig, trafficLight, red, yellow, green)
   if err != nil {
     log.Fatal(err)
   }
 
-  // TODO: does not KILL on ctrl-c
   hc.OnTermination(func() {
-    log.Println("on term")
+    log.Println("stopping...")
     t.Stop()
     log.Println("stopped, exiting")
     os.Exit(0)
