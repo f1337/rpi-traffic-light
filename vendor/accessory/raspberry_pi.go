@@ -1,42 +1,59 @@
 package accessory
 
 import (
+  "github.com/brutella/hc"
   "github.com/brutella/hc/accessory"
   "github.com/imdario/mergo"
+  "os"
 )
 
 type RaspberryPi struct {
-  Bridge       *accessory.Accessory
-  Accessories []accessory.Accessory
+  Bridge        *accessory.Accessory
+  Accessories []*accessory.Accessory
 }
 
-func NewRaspberryPi (info accessory.Info, accessories ...*accessory.Accessory) *RaspberryPi {
-  acc := RaspberryPi{}
-  defaultInfo := accessory.Info{
+// create a new RaspberryPi bridge accessory
+func NewRaspberryPi (info Info) *RaspberryPi {
+  bridgeInfo := accessory.Info{
     Name:         "RaspberryPi",
     Manufacturer: "Raspberry Pi Foundation",
     Model:        "Raspberry Pi",
   }
-  mergo.Merge(&info, defaultInfo)
-  acc.Bridge = accessory.New(info, accessory.TypeBridge)
-  // acc.Accessories = accessories
+  mergo.MergeWithOverwrite(&bridgeInfo, info)
+
+  acc := RaspberryPi{}
+  acc.Bridge = accessory.New(bridgeInfo, accessory.TypeBridge)
 
   return &acc
 }
 
-// func (this *RaspberryPi) Start (config Config) (err error) {
-//   ipConfig := hc.Config{Pin: "86753091", StoragePath: "krakatoa"}
-//   t, err := hc.NewIPTransport(ipConfig, this.Accessory, this.Switches)
-//   if err != nil {
-//     return
-//   }
-//
-//   hc.OnTermination(func() {
-//     log.Println("stopping...")
-//     t.Stop()
-//     log.Println("stopped, exiting")
-//     os.Exit(0)
-//   })
-//
-//   t.Start()
-// }
+// setup a digital switch accessory, and add it to the Accessories array
+func (this *RaspberryPi) AddDigitalSwitch (info Info, pin string, inverted bool) {
+  // TODO: return an error on dupe pins
+  acc := NewDigitalSwitch(info, pin, inverted)
+  this.Accessories = append(this.Accessories, acc.Accessory)
+}
+
+// start the HAP server
+func (this *RaspberryPi) Start (config Config) (err error) {
+  serverConfig := hc.Config{
+    IP:          config.IP,
+    Pin:         config.Pin,
+    Port:        config.Port,
+    StoragePath: config.StoragePath,
+  }
+
+  t, err := hc.NewIPTransport(serverConfig, this.Bridge, this.Accessories...)
+  if err != nil {
+    return
+  }
+
+  hc.OnTermination(func() {
+    t.Stop()
+    // TODO: close GPIO connection
+    os.Exit(0)
+  })
+
+  t.Start()
+  return
+}

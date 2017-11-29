@@ -6,6 +6,7 @@ import (
   "github.com/kidoman/embd"
   _ "github.com/kidoman/embd/host/rpi"
   "log"
+  "time"
 )
 
 type DigitalSwitch struct {
@@ -15,7 +16,35 @@ type DigitalSwitch struct {
   Inverted bool
 }
 
-func (this *DigitalSwitch) OnValueRemoteUpdate (on bool) {
+func NewDigitalSwitch (info Info, pin string, inverted bool) *DigitalSwitch {
+  accInfo := accessory.Info{
+    Name:         info.Name,
+    Manufacturer: info.Manufacturer,
+    Model:        info.Model,
+    SerialNumber: info.SerialNumber,
+  }
+
+  acc := DigitalSwitch{}
+  acc.Accessory = accessory.New(accInfo, accessory.TypeOutlet)
+  acc.Pin = pin
+  acc.Inverted = inverted
+  acc.Switch = service.NewSwitch()
+  acc.AddService(acc.Switch.Service)
+
+  acc.Accessory.OnIdentify(acc.OnIdentify)
+  acc.Switch.On.OnValueRemoteUpdate(acc.SetOn)
+
+  return &acc
+}
+
+func (this *DigitalSwitch) OnIdentify() {
+  timeout := 1 * time.Second
+  this.SetOn(true)
+  time.Sleep(timeout)
+  this.SetOn(false)
+}
+
+func (this *DigitalSwitch) SetOn (on bool) {
   var value int
 
   if on == this.Inverted {
@@ -40,15 +69,4 @@ func (this *DigitalSwitch) Write (value int) (err error) {
 
   err = embd.DigitalWrite(this.Pin, value)
   return
-}
-
-func NewDigitalSwitch (info accessory.Info, pin string, inverted bool) *DigitalSwitch {
-  acc := DigitalSwitch{}
-  acc.Accessory = accessory.New(info, accessory.TypeOutlet)
-  acc.Pin = pin
-  acc.Inverted = inverted
-  acc.Switch = service.NewSwitch()
-  acc.AddService(acc.Switch.Service)
-  acc.Switch.On.OnValueRemoteUpdate(acc.OnValueRemoteUpdate)
-  return &acc
 }
