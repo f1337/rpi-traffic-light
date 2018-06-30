@@ -6,7 +6,7 @@ import (
 )
 
 func main () {
-  // TODO: read rpiConfig, per-light config, ipConfig from local .yml or .json
+  // TODO: read rpiInfo, per-light config, rpiConfig from .json file
   // cf. https://github.com/timoschilling/dashbridge/blob/master/dashbridge.go
   trafficLight := rpi.NewRaspberryPi(rpi.Info{
     Name:         "TrafficLight",
