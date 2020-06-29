@@ -1,22 +1,17 @@
-default: build compile install run
+mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
+current_dir := $(dir $(mkfile_path))
+
+default: start
 .PHONY: default
 
 .PHONY: build
 build:
-	@echo 'building image...'
-	docker build -q -t pilight-http .
+	@docker run --rm --name yarn-build -v "$(current_dir)":/usr/src/app -w /usr/src/app node:8 yarn build
 
-.PHONY: compile
-compile:
-	@echo 'compiling script...'
-	docker run -it --rm -v "$PWD":/go/src/app -e GOARM=6 -e GOARCH=arm -e GOOS=linux pilight-http go build pilight-http.go
+.PHONY: start
+start:
+	@docker run -it --rm --name yarn-start -v "$(current_dir)":/usr/src/app -w /usr/src/app -p 3000:3000 node:8 yarn start
 
-.PHONY: install
-install:
-	@echo 'copying to rpi...'
-	scp pilight-http pi@pilight.local:/home/pi/
-
-.PHONY: run
-run:
-	@echo 'running on rpi...'
-	ssh -t pi@pilight.local 'sudo ./pilight-http'
+.PHONY: test
+test:
+	@docker run -it --rm --name yarn-test -v "$(current_dir)":/usr/src/app -w /usr/src/app node:8 yarn test
