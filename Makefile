@@ -1,5 +1,3 @@
-$stdout.sync = true
-
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 current_dir := $(dir $(mkfile_path))
 docker_run  := docker run --rm -v "$(current_dir)":/usr/src/app -w /usr/src/app
