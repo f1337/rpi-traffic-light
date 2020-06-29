@@ -2,13 +2,17 @@
 
 A React UI for controlling an [HTTP-to-GPIO interface](https://github.com/f1337/go-gpio-http).
 
-## Build, then run development server
+## Install, then build for deployment/ci
 
 `make`
 
 ## Build
 
 `make build`
+
+## Install
+
+`make install`
 
 ## Run development server
 
