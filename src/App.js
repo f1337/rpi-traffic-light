@@ -4,12 +4,12 @@ import TrafficLight from 'react-trafficlight';
 import './App.css';
 
 const App = () => (
-  <div class="App">
-    <TrafficLightContainer />
+  <div className="App">
+    <GPIOTrafficLight red="17" yellow="27" green="22" />
   </div>
 );
 
-class TrafficLightContainer extends React.Component {
+class GPIOTrafficLight extends React.Component {
   constructor(props) {
     super(props);
 
@@ -20,19 +20,55 @@ class TrafficLightContainer extends React.Component {
     }
   }
 
+  componentDidMount() {
+    for (const color in this.props) {
+      const pin = this.props[color];
+
+      fetch('/gpio/' + pin)
+      .then((response) => response.json())
+      .then((json) => {
+        this.updateLight(color, json);
+      })
+      .catch((error) => console.error(error))
+    }
+  }
+
   render() {
     return (
       <TrafficLight
         Size="150"
-        onRedClick={() => this.setState({ redOn: !this.state.redOn })}
-        onYellowClick={() => this.setState({ yellowOn: !this.state.yellowOn })}
-        onGreenClick={() => this.setState({ greenOn: !this.state.greenOn })}
+        onRedClick={() => this.toggleLight('red')}
+        onYellowClick={() => this.toggleLight('yellow')}
+        onGreenClick={() => this.toggleLight('green')}
 
         RedOn={this.state.redOn}
         YellowOn={this.state.yellowOn}
         GreenOn={this.state.greenOn}
       />
     )
+  }
+
+  updateLight(color, json) {
+    const button = color + 'On';
+    this.setState({ [button]: (json.value === '0') });
+  }
+
+  toggleLight(color) {
+    const pin = this.props[color];
+
+    fetch('/gpio/' + pin, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ value: '0' })
+    })
+    .then((response) => response.json())
+    .then((json) => {
+      this.updateLight(color, json);
+    })
+    .catch((error) => console.error(error));
   }
 }
 
