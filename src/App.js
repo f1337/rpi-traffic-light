@@ -59,7 +59,7 @@ class GPIOTrafficLight extends React.Component {
     const value = this.state[button] ? '1' : '0';
 
     fetch('/gpio/' + pin, {
-      method: 'POST',
+      method: 'PUT',
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json'
