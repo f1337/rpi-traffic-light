@@ -55,6 +55,8 @@ class GPIOTrafficLight extends React.Component {
 
   toggleLight(color) {
     const pin = this.props[color];
+    const button = color + 'On';
+    const value = this.state[button] ? '1' : '0';
 
     fetch('/gpio/' + pin, {
       method: 'POST',
@@ -62,7 +64,7 @@ class GPIOTrafficLight extends React.Component {
         Accept: 'application/json',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ value: '0' })
+      body: JSON.stringify({ value: value })
     })
     .then((response) => response.json())
     .then((json) => {
